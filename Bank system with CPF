@@ -1,0 +1,87 @@
+# Dicionário para armazenar informações das contas
+contas = {}
+
+def criar_conta_cpf():
+    cpf = input("Informe o CPF do titular da conta: ")
+    if cpf in contas:
+        print("Conta com CPF já existe.")
+    else:
+        contas[cpf] = {"saldo": 0, "limite": 500, "extrato": "", "numero_saques": 0}
+        print(f"Conta com CPF {cpf} criada com sucesso!")
+
+def criar_conta_corrente(cpf):
+    if cpf in contas:
+        if "conta_corrente" in contas[cpf]:
+            print("Conta corrente já associada a esse CPF.")
+        else:
+            contas[cpf]["conta_corrente"] = {"saldo": 0, "limite": 1000, "extrato": "", "numero_saques": 0}
+            print("Conta corrente associada com sucesso.")
+    else:
+        print("CPF não encontrado. Crie uma conta com CPF primeiro.")
+
+menu = """
+[1] Criar conta com CPF
+[2] Criar conta corrente associada a um CPF
+[3] Depositar
+[4] Sacar
+[5] Extrato
+[6] Sair
+
+=> """
+
+while True:
+    opcao = input(menu)
+
+    if opcao == "1":
+        criar_conta_cpf()
+
+    elif opcao == "2":
+        cpf = input("Informe o CPF para associar a conta corrente: ")
+        criar_conta_corrente(cpf)
+
+    elif opcao == "3":
+        cpf = input("Informe o CPF do titular da conta: ")
+        valor = float(input("Informe o valor do depósito: "))
+        if cpf in contas and valor > 0:
+            contas[cpf]["saldo"] += valor
+            contas[cpf]["extrato"] += f"Depósito: R$ {valor:.2f}\n"
+        else:
+            print("Operação falhou! O CPF não foi encontrado ou o valor informado é inválido.")
+
+    elif opcao == "4":
+        cpf = input("Informe o CPF do titular da conta: ")
+        valor = float(input("Informe o valor do saque: "))
+        if cpf in contas:
+            excedeu_saldo = valor > contas[cpf]["saldo"]
+            excedeu_limite = valor > contas[cpf]["limite"]
+            excedeu_saques = contas[cpf]["numero_saques"] >= LIMITE_SAQUES
+            if excedeu_saldo:
+                print("Operação falhou! Você não tem saldo suficiente.")
+            elif excedeu_limite:
+                print("Operação falhou! O valor do saque excede o limite.")
+            elif excedeu_saques:
+                print("Operação falhou! Número máximo de saques excedido.")
+            elif valor > 0:
+                contas[cpf]["saldo"] -= valor
+                contas[cpf]["extrato"] += f"Saque: R$ {valor:.2f}\n"
+                contas[cpf]["numero_saques"] += 1
+            else:
+                print("Operação falhou! O valor informado é inválido.")
+        else:
+            print("Operação falhou! O CPF não foi encontrado.")
+
+    elif opcao == "5":
+        cpf = input("Informe o CPF do titular da conta: ")
+        if cpf in contas:
+            print("\n================ EXTRATO ================")
+            print("Não foram realizadas movimentações." if not contas[cpf]["extrato"] else contas[cpf]["extrato"])
+            print(f"\nSaldo: R$ {contas[cpf]['saldo']:.2f}")
+            print("==========================================")
+        else:
+            print("Operação falhou! O CPF não foi encontrado.")
+
+    elif opcao == "6":
+        break
+
+    else:
+        print("Operação inválida, por favor selecione novamente a operação desejada.")
